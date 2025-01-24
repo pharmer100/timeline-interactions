@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card } from '@/components/ui/card';
-import { Camera, Video, Calendar, Bell, AlertTriangle, Flag } from 'lucide-react';
+import { Camera, Video, Calendar, Bell, AlertTriangle, Flag, PenSquare } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -58,67 +58,74 @@ export const TimelineEvent: React.FC<TimelineEventProps> = ({
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Card className="w-64 p-4 shadow-md bg-timeline-event animate-fade-in cursor-pointer hover:shadow-lg">
-          <div className="flex flex-col items-center mb-2">
-            {eventIcons[type.toLowerCase()]}
-          </div>
-          <div className="text-sm text-gray-500">{time}</div>
-          <h3 className="font-semibold mt-1">{title}</h3>
-          <div className="text-sm mt-2">{description}</div>
-        </Card>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>Edit Event</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Event Type</label>
-            <Select value={editType} onValueChange={setEditType}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="camera">Camera</SelectItem>
-                <SelectItem value="video">Video</SelectItem>
-                <SelectItem value="calendar">Calendar</SelectItem>
-                <SelectItem value="alert">Alert</SelectItem>
-                <SelectItem value="notification">Notification</SelectItem>
-                <SelectItem value="flag">Flag</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Title</label>
-            <Input
-              value={editTitle}
-              onChange={(e) => setEditTitle(e.target.value)}
-              placeholder="Event title"
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Time</label>
-            <Input
-              type="datetime-local"
-              value={editTime}
-              onChange={(e) => setEditTime(e.target.value)}
-            />
-          </div>
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Description</label>
-            <Textarea
-              value={editDescription}
-              onChange={(e) => setEditDescription(e.target.value)}
-              placeholder="Event description"
-            />
-          </div>
-          <Button onClick={handleSave} className="w-full">
-            Save Changes
+    <Card className="w-64 p-4 shadow-md bg-timeline-event animate-fade-in relative">
+      <div className="flex flex-col items-center mb-2">
+        {eventIcons[type.toLowerCase()]}
+      </div>
+      <Dialog>
+        <DialogTrigger asChild>
+          <Button 
+            variant="ghost" 
+            size="icon"
+            className="absolute top-2 right-2 h-6 w-6"
+          >
+            <PenSquare className="h-4 w-4" />
           </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Event</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Event Type</label>
+              <Select value={editType} onValueChange={setEditType}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="camera">Camera</SelectItem>
+                  <SelectItem value="video">Video</SelectItem>
+                  <SelectItem value="calendar">Calendar</SelectItem>
+                  <SelectItem value="alert">Alert</SelectItem>
+                  <SelectItem value="notification">Notification</SelectItem>
+                  <SelectItem value="flag">Flag</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Title</label>
+              <Input
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="Event title"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Time</label>
+              <Input
+                type="datetime-local"
+                value={editTime}
+                onChange={(e) => setEditTime(e.target.value)}
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Description</label>
+              <Textarea
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                placeholder="Event description"
+              />
+            </div>
+            <Button onClick={handleSave} className="w-full">
+              Save Changes
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <div className="text-sm text-gray-500">{time}</div>
+      <h3 className="font-semibold mt-1">{title}</h3>
+      <div className="text-sm mt-2">{description}</div>
+    </Card>
   );
 };

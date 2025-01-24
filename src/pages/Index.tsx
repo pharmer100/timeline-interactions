@@ -50,9 +50,9 @@ const Index = () => {
               ...timeline.events,
               {
                 id: Math.random().toString(),
-                title: 'New Event',
-                time: new Date().toISOString().slice(0, 16),
-                description: 'Event description',
+                title: '',
+                time: '',
+                description: '',
                 type: 'camera',
               },
             ],
