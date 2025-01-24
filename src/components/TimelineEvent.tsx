@@ -33,14 +33,12 @@ interface TimelineEventProps {
   onUpdate: (data: { title: string; time: string; description: string; type: string }) => void;
 }
 
-const eventIcons: Record<string, React.ReactNode> = {
-  camera: <Camera className="h-6 w-6" />,
-  video: <Video className="h-6 w-6" />,
-  calendar: <Calendar className="h-6 w-6" />,
-  alert: <AlertTriangle className="h-6 w-6" />,
-  notification: <Bell className="h-6 w-6" />,
-  flag: <Flag className="h-6 w-6" />,
-};
+interface AnchorPoint {
+  id: string;
+  position: 'top' | 'right' | 'bottom' | 'left';
+  x: number;
+  y: number;
+}
 
 const connectionTypes = [
   { id: 'line', icon: <Minus className="h-4 w-4" />, label: 'Solid Line' },
@@ -49,6 +47,15 @@ const connectionTypes = [
   { id: 'arrow-down', icon: <ArrowDown className="h-4 w-4" />, label: 'Arrow Down' },
   { id: 'two-way', icon: <ArrowLeftRight className="h-4 w-4" />, label: 'Two Way Arrow' },
 ];
+
+const eventIcons: Record<string, React.ReactNode> = {
+  camera: <Camera className="h-6 w-6" />,
+  video: <Video className="h-6 w-6" />,
+  calendar: <Calendar className="h-6 w-6" />,
+  alert: <AlertTriangle className="h-6 w-6" />,
+  notification: <Bell className="h-6 w-6" />,
+  flag: <Flag className="h-6 w-6" />,
+};
 
 export const TimelineEvent: React.FC<TimelineEventProps> = ({
   title,
@@ -63,6 +70,8 @@ export const TimelineEvent: React.FC<TimelineEventProps> = ({
   const [editType, setEditType] = React.useState(type);
   const [isConnecting, setIsConnecting] = useState(false);
   const [selectedConnectionType, setSelectedConnectionType] = useState<string | null>(null);
+  const [selectedAnchor, setSelectedAnchor] = useState<AnchorPoint | null>(null);
+  const [showAnchors, setShowAnchors] = useState(false);
 
   const handleSave = () => {
     onUpdate({
@@ -75,14 +84,46 @@ export const TimelineEvent: React.FC<TimelineEventProps> = ({
 
   const handleConnectionStart = (connectionType: string) => {
     setSelectedConnectionType(connectionType);
-    setIsConnecting(true);
-    // Here you would implement the actual connection logic
-    // This could involve drawing SVG lines or using a library like jsPlumb
+    setShowAnchors(true);
     console.log('Starting connection with type:', connectionType);
+  };
+
+  const handleAnchorSelect = (position: AnchorPoint['position']) => {
+    const anchor: AnchorPoint = {
+      id: Math.random().toString(),
+      position,
+      x: 0, // These will be calculated based on the card's position
+      y: 0,
+    };
+    setSelectedAnchor(anchor);
+    setIsConnecting(true);
+    console.log('Selected anchor point:', position);
   };
 
   return (
     <Card className="w-64 p-4 shadow-md bg-timeline-event animate-fade-in relative">
+      {/* Connection anchor points - only shown when connection type is selected */}
+      {showAnchors && (
+        <>
+          <div 
+            className="absolute w-3 h-3 -top-1.5 left-1/2 transform -translate-x-1/2 bg-blue-500 rounded-full cursor-pointer hover:scale-125 transition-transform"
+            onClick={() => handleAnchorSelect('top')}
+          />
+          <div 
+            className="absolute w-3 h-3 top-1/2 -right-1.5 transform -translate-y-1/2 bg-blue-500 rounded-full cursor-pointer hover:scale-125 transition-transform"
+            onClick={() => handleAnchorSelect('right')}
+          />
+          <div 
+            className="absolute w-3 h-3 -bottom-1.5 left-1/2 transform -translate-x-1/2 bg-blue-500 rounded-full cursor-pointer hover:scale-125 transition-transform"
+            onClick={() => handleAnchorSelect('bottom')}
+          />
+          <div 
+            className="absolute w-3 h-3 top-1/2 -left-1.5 transform -translate-y-1/2 bg-blue-500 rounded-full cursor-pointer hover:scale-125 transition-transform"
+            onClick={() => handleAnchorSelect('left')}
+          />
+        </>
+      )}
+
       <div className="flex justify-between items-start mb-2">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
