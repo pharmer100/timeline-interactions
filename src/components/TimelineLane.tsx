@@ -19,6 +19,8 @@ interface Connection {
   sourceAnchor: string;
   targetAnchor: string;
   type: string;
+  startX?: number;  // Added for temporary connection drawing
+  startY?: number;  // Added for temporary connection drawing
 }
 
 interface TimelineLaneProps {
@@ -202,10 +204,10 @@ export const TimelineLane: React.FC<TimelineLaneProps> = ({
             className="text-timeline-connection"
             strokeWidth="2"
             strokeDasharray={activeConnection.type === 'dotted' ? '4' : undefined}
-            markerEnd={activeConnection.type.includes('arrow') ? 'url(#active-arrowhead)' : undefined}
+            markerEnd={activeConnection.type?.includes('arrow') ? 'url(#active-arrowhead)' : undefined}
           />
         )}
-        {activeConnection?.type.includes('arrow') && (
+        {activeConnection?.type?.includes('arrow') && (
           <defs>
             <marker
               id="active-arrowhead"
