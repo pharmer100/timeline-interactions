@@ -15,7 +15,7 @@ export const TimelineEvent: React.FC<TimelineEventProps> = ({
   type,
 }) => {
   return (
-    <Card className="w-64 p-4 shadow-md bg-timeline-event animate-fade-in">
+    <Card className="w-64 p-4 shadow-md bg-timeline-event animate-fade-in cursor-move">
       <div className="text-sm text-gray-500">{time}</div>
       <h3 className="font-semibold mt-1">{title}</h3>
       <div className="text-sm mt-2">{description}</div>

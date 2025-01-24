@@ -2,6 +2,7 @@ import React from 'react';
 import { TimelineEvent } from './TimelineEvent';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import Draggable from 'react-draggable';
 
 interface Event {
   id: string;
@@ -31,15 +32,23 @@ export const TimelineLane: React.FC<TimelineLaneProps> = ({
           Add Event
         </Button>
       </div>
-      <div className="pt-16 px-4 flex gap-4">
+      <div className="pt-24 px-4 flex gap-4">
         {events.map((event) => (
-          <TimelineEvent
+          <Draggable
             key={event.id}
-            title={event.title}
-            time={event.time}
-            description={event.description}
-            type={event.type}
-          />
+            bounds="parent"
+            defaultPosition={{x: 0, y: 0}}
+            grid={[20, 20]}
+          >
+            <div>
+              <TimelineEvent
+                title={event.title}
+                time={event.time}
+                description={event.description}
+                type={event.type}
+              />
+            </div>
+          </Draggable>
         ))}
       </div>
     </div>
