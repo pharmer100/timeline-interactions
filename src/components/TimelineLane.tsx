@@ -3,6 +3,17 @@ import { TimelineEvent } from './TimelineEvent';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import Draggable from 'react-draggable';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { toast } from "sonner";
 
 interface Event {
   id: string;
@@ -19,26 +30,37 @@ interface Connection {
   sourceAnchor: string;
   targetAnchor: string;
   type: string;
-  startX?: number;  // Added for temporary connection drawing
-  startY?: number;  // Added for temporary connection drawing
+  startX?: number;
+  startY?: number;
+  timelineId?: string;
+  targetTimelineId?: string;
 }
 
 interface TimelineLaneProps {
   name: string;
   events: Event[];
+  timelineId: string;
   onAddEvent: () => void;
   onUpdateEvent: (eventId: string, data: Partial<Event>) => void;
+  connections: Connection[];
+  onUpdateConnections: (connections: Connection[]) => void;
+  allTimelineEvents: { timelineId: string; events: Event[] }[];
 }
 
 export const TimelineLane: React.FC<TimelineLaneProps> = ({
   name,
   events,
+  timelineId,
   onAddEvent,
   onUpdateEvent,
+  connections,
+  onUpdateConnections,
+  allTimelineEvents,
 }) => {
-  const [connections, setConnections] = useState<Connection[]>([]);
   const [activeConnection, setActiveConnection] = useState<Partial<Connection> | null>(null);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
+  const [selectedConnection, setSelectedConnection] = useState<Connection | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -71,7 +93,6 @@ export const TimelineLane: React.FC<TimelineLaneProps> = ({
     let startX = sourceRect.left - containerRect.left;
     let startY = sourceRect.top - containerRect.top;
 
-    // Adjust position based on anchor point
     switch (anchorPosition) {
       case 'top':
         startX += sourceRect.width / 2;
@@ -95,10 +116,11 @@ export const TimelineLane: React.FC<TimelineLaneProps> = ({
       type: connectionType,
       startX,
       startY,
+      timelineId,
     });
   };
 
-  const handleConnectionEnd = (eventId: string, anchorPosition: string) => {
+  const handleConnectionEnd = (eventId: string, anchorPosition: string, targetTimelineId: string) => {
     if (activeConnection && activeConnection.sourceId !== eventId) {
       const newConnection: Connection = {
         id: Math.random().toString(),
@@ -107,28 +129,62 @@ export const TimelineLane: React.FC<TimelineLaneProps> = ({
         sourceAnchor: activeConnection.sourceAnchor!,
         targetAnchor: anchorPosition,
         type: activeConnection.type!,
+        timelineId: activeConnection.timelineId,
+        targetTimelineId,
       };
-      setConnections([...connections, newConnection]);
+      
+      onUpdateConnections([...connections, newConnection]);
+      toast.success("Connection created successfully");
     }
     setActiveConnection(null);
   };
 
-  const getAnchorPosition = (eventId: string, anchorPosition: string): { x: number; y: number } => {
+  const handleConnectionClick = (connection: Connection) => {
+    setSelectedConnection(connection);
+    setShowDeleteDialog(true);
+  };
+
+  const handleDeleteConnection = () => {
+    if (selectedConnection) {
+      const updatedConnections = connections.filter(conn => conn.id !== selectedConnection.id);
+      onUpdateConnections(updatedConnections);
+      toast.success("Connection deleted successfully");
+    }
+    setShowDeleteDialog(false);
+    setSelectedConnection(null);
+  };
+
+  const getAnchorPosition = (eventId: string, anchorPosition: string, eventTimelineId: string): { x: number; y: number } => {
     const element = document.getElementById(`event-${eventId}`);
     if (!element || !containerRef.current) return { x: 0, y: 0 };
 
     const rect = element.getBoundingClientRect();
     const containerRect = containerRef.current.getBoundingClientRect();
 
+    // Calculate vertical offset based on timeline position
+    const timelineOffset = allTimelineEvents.findIndex(t => t.timelineId === eventTimelineId) * 200; // Adjust based on timeline height
+
     switch (anchorPosition) {
       case 'top':
-        return { x: rect.left + rect.width / 2 - containerRect.left, y: rect.top - containerRect.top };
+        return { 
+          x: rect.left + rect.width / 2 - containerRect.left, 
+          y: rect.top - containerRect.top + timelineOffset 
+        };
       case 'right':
-        return { x: rect.right - containerRect.left, y: rect.top + rect.height / 2 - containerRect.top };
+        return { 
+          x: rect.right - containerRect.left, 
+          y: rect.top + rect.height / 2 - containerRect.top + timelineOffset 
+        };
       case 'bottom':
-        return { x: rect.left + rect.width / 2 - containerRect.left, y: rect.bottom - containerRect.top };
+        return { 
+          x: rect.left + rect.width / 2 - containerRect.left, 
+          y: rect.bottom - containerRect.top + timelineOffset 
+        };
       case 'left':
-        return { x: rect.left - containerRect.left, y: rect.top + rect.height / 2 - containerRect.top };
+        return { 
+          x: rect.left - containerRect.left, 
+          y: rect.top + rect.height / 2 - containerRect.top + timelineOffset 
+        };
       default:
         return { x: 0, y: 0 };
     }
@@ -148,8 +204,8 @@ export const TimelineLane: React.FC<TimelineLaneProps> = ({
       
       <svg className="absolute top-0 left-0 w-full h-full pointer-events-none">
         {connections.map((connection) => {
-          const source = getAnchorPosition(connection.sourceId, connection.sourceAnchor);
-          const target = getAnchorPosition(connection.targetId, connection.targetAnchor);
+          const source = getAnchorPosition(connection.sourceId, connection.sourceAnchor, connection.timelineId!);
+          const target = getAnchorPosition(connection.targetId, connection.targetAnchor, connection.targetTimelineId!);
           
           return (
             <g key={connection.id}>
@@ -160,9 +216,11 @@ export const TimelineLane: React.FC<TimelineLaneProps> = ({
                   x2={target.x}
                   y2={target.y}
                   stroke="currentColor"
-                  className="text-timeline-connection"
+                  className="text-timeline-connection cursor-pointer"
                   strokeWidth="2"
                   strokeDasharray="4"
+                  onClick={() => handleConnectionClick(connection)}
+                  style={{ pointerEvents: 'all' }}
                 />
               ) : (
                 <line
@@ -171,9 +229,11 @@ export const TimelineLane: React.FC<TimelineLaneProps> = ({
                   x2={target.x}
                   y2={target.y}
                   stroke="currentColor"
-                  className="text-timeline-connection"
+                  className="text-timeline-connection cursor-pointer"
                   strokeWidth="2"
                   markerEnd={connection.type.includes('arrow') ? `url(#arrowhead-${connection.id})` : undefined}
+                  onClick={() => handleConnectionClick(connection)}
+                  style={{ pointerEvents: 'all' }}
                 />
               )}
               {connection.type.includes('arrow') && (
@@ -244,7 +304,7 @@ export const TimelineLane: React.FC<TimelineLaneProps> = ({
                   handleConnectionStart(event.id, anchorPosition, connectionType)
                 }
                 onConnectionEnd={(anchorPosition) => 
-                  handleConnectionEnd(event.id, anchorPosition)
+                  handleConnectionEnd(event.id, anchorPosition, timelineId)
                 }
                 isConnecting={!!activeConnection && activeConnection.sourceId !== event.id}
               />
@@ -252,6 +312,21 @@ export const TimelineLane: React.FC<TimelineLaneProps> = ({
           </Draggable>
         ))}
       </div>
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Connection</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this connection? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteConnection}>Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

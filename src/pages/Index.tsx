@@ -6,6 +6,17 @@ import { Plus } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 
+interface Connection {
+  id: string;
+  sourceId: string;
+  targetId: string;
+  sourceAnchor: string;
+  targetAnchor: string;
+  type: string;
+  timelineId?: string;
+  targetTimelineId?: string;
+}
+
 interface Timeline {
   id: string;
   name: string;
@@ -20,6 +31,7 @@ interface Timeline {
 
 const Index = () => {
   const [timelines, setTimelines] = useState<Timeline[]>([]);
+  const [connections, setConnections] = useState<Connection[]>([]);
   const [newTimelineName, setNewTimelineName] = useState('');
 
   const addTimeline = () => {
@@ -84,6 +96,10 @@ const Index = () => {
     toast.success('Event updated successfully');
   };
 
+  const updateConnections = (newConnections: Connection[]) => {
+    setConnections(newConnections);
+  };
+
   return (
     <div className="min-h-screen bg-secondary">
       <div className="container mx-auto py-8">
@@ -97,8 +113,12 @@ const Index = () => {
               key={timeline.id}
               name={timeline.name}
               events={timeline.events}
+              timelineId={timeline.id}
               onAddEvent={() => addEvent(timeline.id)}
               onUpdateEvent={(eventId, data) => updateEvent(timeline.id, eventId, data)}
+              connections={connections}
+              onUpdateConnections={updateConnections}
+              allTimelineEvents={timelines.map(t => ({ timelineId: t.id, events: t.events }))}
             />
           ))}
           
