@@ -43,6 +43,7 @@ export const TimelineLane: React.FC<TimelineLaneProps> = ({
             bounds="parent"
             defaultPosition={{x: 0, y: -32}} // Adjusted to align with middle of timeline
             grid={[20, 20]}
+            axis="x" // Only allow horizontal dragging
           >
             <div>
               <TimelineEvent
