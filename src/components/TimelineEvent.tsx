@@ -26,18 +26,19 @@ import {
 } from "@/components/ui/select";
 
 interface TimelineEventProps {
+  id: string;
   title: string;
   time: string;
   description: string;
   type: string;
+  isConnecting?: boolean;
   onUpdate: (data: { title: string; time: string; description: string; type: string }) => void;
+  onConnectionStart?: (anchorPosition: string, connectionType: string) => void;
+  onConnectionEnd?: (anchorPosition: string) => void;
 }
 
 interface AnchorPoint {
-  id: string;
   position: 'top' | 'right' | 'bottom' | 'left';
-  x: number;
-  y: number;
 }
 
 const connectionTypes = [
@@ -58,20 +59,22 @@ const eventIcons: Record<string, React.ReactNode> = {
 };
 
 export const TimelineEvent: React.FC<TimelineEventProps> = ({
+  id,
   title,
   time,
   description,
   type,
+  isConnecting,
   onUpdate,
+  onConnectionStart,
+  onConnectionEnd,
 }) => {
   const [editTitle, setEditTitle] = React.useState(title);
   const [editTime, setEditTime] = React.useState(time);
   const [editDescription, setEditDescription] = React.useState(description);
   const [editType, setEditType] = React.useState(type);
-  const [isConnecting, setIsConnecting] = useState(false);
-  const [selectedConnectionType, setSelectedConnectionType] = useState<string | null>(null);
-  const [selectedAnchor, setSelectedAnchor] = useState<AnchorPoint | null>(null);
   const [showAnchors, setShowAnchors] = useState(false);
+  const [selectedConnectionType, setSelectedConnectionType] = useState<string | null>(null);
 
   const handleSave = () => {
     onUpdate({
@@ -85,41 +88,39 @@ export const TimelineEvent: React.FC<TimelineEventProps> = ({
   const handleConnectionStart = (connectionType: string) => {
     setSelectedConnectionType(connectionType);
     setShowAnchors(true);
-    console.log('Starting connection with type:', connectionType);
   };
 
-  const handleAnchorSelect = (position: AnchorPoint['position']) => {
-    const anchor: AnchorPoint = {
-      id: Math.random().toString(),
-      position,
-      x: 0, // These will be calculated based on the card's position
-      y: 0,
-    };
-    setSelectedAnchor(anchor);
-    setIsConnecting(true);
-    console.log('Selected anchor point:', position);
+  const handleAnchorClick = (position: AnchorPoint['position']) => {
+    if (isConnecting && onConnectionEnd) {
+      onConnectionEnd(position);
+      setShowAnchors(false);
+    } else if (selectedConnectionType && onConnectionStart) {
+      onConnectionStart(position, selectedConnectionType);
+      setShowAnchors(false);
+      setSelectedConnectionType(null);
+    }
   };
 
   return (
     <Card className="w-64 p-4 shadow-md bg-timeline-event animate-fade-in relative">
-      {/* Connection anchor points - only shown when connection type is selected */}
-      {showAnchors && (
+      {/* Connection anchor points */}
+      {(showAnchors || isConnecting) && (
         <>
           <div 
             className="absolute w-3 h-3 -top-1.5 left-1/2 transform -translate-x-1/2 bg-blue-500 rounded-full cursor-pointer hover:scale-125 transition-transform"
-            onClick={() => handleAnchorSelect('top')}
+            onClick={() => handleAnchorClick('top')}
           />
           <div 
             className="absolute w-3 h-3 top-1/2 -right-1.5 transform -translate-y-1/2 bg-blue-500 rounded-full cursor-pointer hover:scale-125 transition-transform"
-            onClick={() => handleAnchorSelect('right')}
+            onClick={() => handleAnchorClick('right')}
           />
           <div 
             className="absolute w-3 h-3 -bottom-1.5 left-1/2 transform -translate-x-1/2 bg-blue-500 rounded-full cursor-pointer hover:scale-125 transition-transform"
-            onClick={() => handleAnchorSelect('bottom')}
+            onClick={() => handleAnchorClick('bottom')}
           />
           <div 
             className="absolute w-3 h-3 top-1/2 -left-1.5 transform -translate-y-1/2 bg-blue-500 rounded-full cursor-pointer hover:scale-125 transition-transform"
-            onClick={() => handleAnchorSelect('left')}
+            onClick={() => handleAnchorClick('left')}
           />
         </>
       )}
