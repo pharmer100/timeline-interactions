@@ -32,12 +32,12 @@ export const TimelineLane: React.FC<TimelineLaneProps> = ({
           Add Event
         </Button>
       </div>
-      <div className="pt-16 mt-12 px-4 flex gap-4">
+      <div className="pt-16 mt-16 px-4 flex gap-4">
         {events.map((event) => (
           <Draggable
             key={event.id}
             bounds="parent"
-            defaultPosition={{x: 0, y: -48}} // Position events to align with timeline
+            defaultPosition={{x: 0, y: -32}} // Adjusted to align with middle of timeline
             grid={[20, 20]}
           >
             <div>
