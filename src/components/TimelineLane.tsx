@@ -16,12 +16,14 @@ interface TimelineLaneProps {
   name: string;
   events: Event[];
   onAddEvent: () => void;
+  onUpdateEvent: (eventId: string, data: Partial<Event>) => void;
 }
 
 export const TimelineLane: React.FC<TimelineLaneProps> = ({
   name,
   events,
   onAddEvent,
+  onUpdateEvent,
 }) => {
   return (
     <div className="min-h-[200px] relative">
@@ -41,9 +43,9 @@ export const TimelineLane: React.FC<TimelineLaneProps> = ({
           <Draggable
             key={event.id}
             bounds="parent"
-            defaultPosition={{x: 0, y: -32}} // Adjusted to align with middle of timeline
+            defaultPosition={{x: 0, y: -32}}
             grid={[20, 20]}
-            axis="x" // Only allow horizontal dragging
+            axis="x"
           >
             <div>
               <TimelineEvent
@@ -51,6 +53,7 @@ export const TimelineLane: React.FC<TimelineLaneProps> = ({
                 time={event.time}
                 description={event.description}
                 type={event.type}
+                onUpdate={(data) => onUpdateEvent(event.id, data)}
               />
             </div>
           </Draggable>

@@ -51,9 +51,9 @@ const Index = () => {
               {
                 id: Math.random().toString(),
                 title: 'New Event',
-                time: '12:00',
+                time: new Date().toISOString().slice(0, 16),
                 description: 'Event description',
-                type: 'Meeting',
+                type: 'camera',
               },
             ],
           };
@@ -62,6 +62,26 @@ const Index = () => {
       })
     );
     toast.success('Event added successfully');
+  };
+
+  const updateEvent = (timelineId: string, eventId: string, data: Partial<Timeline['events'][0]>) => {
+    setTimelines(
+      timelines.map((timeline) => {
+        if (timeline.id === timelineId) {
+          return {
+            ...timeline,
+            events: timeline.events.map((event) => {
+              if (event.id === eventId) {
+                return { ...event, ...data };
+              }
+              return event;
+            }),
+          };
+        }
+        return timeline;
+      })
+    );
+    toast.success('Event updated successfully');
   };
 
   return (
@@ -78,6 +98,7 @@ const Index = () => {
               name={timeline.name}
               events={timeline.events}
               onAddEvent={() => addEvent(timeline.id)}
+              onUpdateEvent={(eventId, data) => updateEvent(timeline.id, eventId, data)}
             />
           ))}
           
