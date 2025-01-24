@@ -24,7 +24,7 @@ export const TimelineLane: React.FC<TimelineLaneProps> = ({
   onAddEvent,
 }) => {
   return (
-    <div className="min-h-[200px] border-b border-timeline-ruler relative">
+    <div className="min-h-[200px] relative">
       <div className="absolute left-4 top-4 flex items-center gap-4">
         <h3 className="font-semibold">{name}</h3>
         <Button variant="outline" size="sm" onClick={onAddEvent}>
@@ -32,6 +32,10 @@ export const TimelineLane: React.FC<TimelineLaneProps> = ({
           Add Event
         </Button>
       </div>
+      
+      {/* Timeline ruler line */}
+      <div className="absolute left-0 right-0 top-[4.5rem] h-[2px] bg-black"></div>
+      
       <div className="pt-16 mt-16 px-4 flex gap-4">
         {events.map((event) => (
           <Draggable
