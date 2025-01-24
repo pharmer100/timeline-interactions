@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Card } from '@/components/ui/card';
-import { Camera, Video, Calendar, Bell, AlertTriangle, Flag, PenSquare, ArrowLeftRight, ArrowUp, ArrowDown, Line, Circle } from 'lucide-react';
+import { Camera, Video, Calendar, Bell, AlertTriangle, Flag, PenSquare, ArrowLeftRight, ArrowUp, ArrowDown, Minus, Circle } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -43,7 +43,7 @@ const eventIcons: Record<string, React.ReactNode> = {
 };
 
 const connectionTypes = [
-  { id: 'line', icon: <Line className="h-4 w-4" />, label: 'Solid Line' },
+  { id: 'line', icon: <Minus className="h-4 w-4" />, label: 'Solid Line' },
   { id: 'dotted', icon: <Circle className="h-4 w-4" />, label: 'Dotted Line' },
   { id: 'arrow-up', icon: <ArrowUp className="h-4 w-4" />, label: 'Arrow Up' },
   { id: 'arrow-down', icon: <ArrowDown className="h-4 w-4" />, label: 'Arrow Down' },
